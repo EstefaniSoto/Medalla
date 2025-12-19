@@ -7,10 +7,12 @@ import {
   Layers,
   PlusCircle,
   Building,
-  UserCog
+  UserCog,
+  LayersPlus
 } from "lucide-react";
 
-export default function DashboardAdmin({ onCategorias, onCandidatas, onInstituciones }) {
+
+export default function DashboardAdmin({ onCategorias, onCandidatas, onInstituciones, onUsuarios }) {
 
 
   return (
@@ -53,16 +55,21 @@ export default function DashboardAdmin({ onCategorias, onCandidatas, onInstituci
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 
           <QuickAction icon={PlusCircle} title="Agregar Candidata" onClick={onCandidatas} color="text-blue-600" />
-          <QuickAction icon={UserCog} title="Crear Usuario Votante" color="text-green-600" />
+          <QuickAction icon={UserCog} title="Crear Usuario Votante" onClick={onUsuarios} color="text-green-600" />
           <QuickAction icon={Building} title="Registrar Institución" onClick={onInstituciones} color="text-orange-500" />
           <QuickAction icon={Layers} title="Administrar Categorías"  onClick={onCategorias} color="text-purple-600" />
 
         </div>
 
         {/* CARDS PRINCIPALES */}
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 
-          
+          <MainCard
+            icon={LayersPlus}
+            title="Añadir preguntas categoría"
+            text="Consulta y añade preguntas a categoría."
+            color="text-purple-600"
+          />
 
           <MainCard
             icon={BarChart2}

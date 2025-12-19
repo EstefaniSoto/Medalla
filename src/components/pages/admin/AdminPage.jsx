@@ -3,6 +3,7 @@ import DashboardAdmin from "./DashboardAdmin";
 import AdministrarCategorias from "./Categorias/AdministrarCategorias";
 import AdministrarCandidatas from "./Candidatas/AdministrarCandidatas";
 import AdministrarInstituciones from "./Instituciones/AdministrarInstituciones";
+import AdministrarUsuarios from "./Usuarios/AdministrarUsuarios";
 
 export default function AdminPage() {
   const [vista, setVista] = useState("dashboard");
@@ -14,6 +15,7 @@ export default function AdminPage() {
           onCategorias={() => setVista("categorias")}
           onCandidatas={() => setVista("candidatas")}
           onInstituciones={() => setVista("instituciones")}
+          onUsuarios={() => setVista("usuarios")}
         />
       )}
 
@@ -27,6 +29,10 @@ export default function AdminPage() {
 
       {vista === "instituciones" && (
         <AdministrarInstituciones onBack={() => setVista("dashboard")} />
+      )}
+
+      {vista === "usuarios" && (
+        <AdministrarUsuarios onBack={() => setVista("dashboard")} />
       )}
     </>
   );
