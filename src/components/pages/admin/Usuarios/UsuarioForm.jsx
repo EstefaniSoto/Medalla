@@ -5,11 +5,13 @@ import {
   actualizarUsuario
 } from "../../../../api/usuarios.api";
 import { obtenerInstituciones } from "../../../../api/instituciones.api";
+import { obtenerRoles } from "../../../../api/roles.api";
 
 export default function UsuarioForm({ usuario, onClose, onSave }) {
   const [nombre, setNombre] = useState(usuario?.nombre || "");
   const [username, setUsername] = useState(usuario?.username || "");
   const [password, setPassword] = useState("");
+  const [roleId, setRoleId] = useState(usuario?.roleId || "");
   const [esInstitucion, setEsInstitucion] = useState(
     usuario?.institucionId != null
   );
@@ -17,10 +19,34 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
     usuario?.institucionId || ""
   );
   const [instituciones, setInstituciones] = useState([]);
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     obtenerInstituciones().then(res => setInstituciones(res.data));
+    obtenerRoles().then(res => setRoles(res.data));
   }, []);
+
+  const generarUsernameInstitucion = (nombre) => {
+    return nombre
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9_]/g, "");
+  };
+
+  const seleccionarInstitucion = (id) => {
+    setInstitucionId(id);
+
+    const institucion = instituciones.find(
+      i => i.institucionId == id
+    );
+
+    if (institucion) {
+      setUsername(generarUsernameInstitucion(institucion.nombre));
+      setNombre(institucion.nombre);
+    }
+  };
 
   const guardar = async (e) => {
     e.preventDefault();
@@ -28,8 +54,8 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
     const data = {
       nombre,
       username,
-      password,
-      roleId: 2,
+      password: password || null,
+      roleId,
       institucionId: esInstitucion ? institucionId : null
     };
 
@@ -58,46 +84,30 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
           </button>
         </div>
 
+        {/* TIPO USUARIO */}
+        <label className="flex items-center gap-2 text-sm mb-4">
+          <input
+            type="checkbox"
+            checked={esInstitucion}
+            onChange={(e) => {
+              setEsInstitucion(e.target.checked);
+              if (!e.target.checked) {
+                setInstitucionId("");
+                setUsername("");
+                setNombre("");
+              }
+            }}
+          />
+          ¿Usuario pertenece a una institución?
+        </label>
+
         <div className="space-y-4">
-          <input
-            className="w-full border p-2 rounded"
-            placeholder="Nombre completo"
-            value={nombre}
-            onChange={e => setNombre(e.target.value)}
-            required
-          />
-
-          <input
-            className="w-full border p-2 rounded"
-            placeholder="Usuario"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            required
-          />
-
-          <input
-            type="password"
-            className="w-full border p-2 rounded"
-            placeholder="Contraseña"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required={!usuario}
-          />
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={esInstitucion}
-              onChange={e => setEsInstitucion(e.target.checked)}
-            />
-            ¿Es institución?
-          </label>
-
+          {/* INSTITUCIÓN */}
           {esInstitucion && (
             <select
               className="w-full border p-2 rounded"
               value={institucionId}
-              onChange={e => setInstitucionId(e.target.value)}
+              onChange={(e) => seleccionarInstitucion(e.target.value)}
               required
             >
               <option value="">Seleccione institución</option>
@@ -108,6 +118,54 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
               ))}
             </select>
           )}
+
+          {/* NOMBRE */}
+          {!esInstitucion && (
+            <input
+              className="w-full border p-2 rounded"
+              placeholder="Nombre completo"
+              value={nombre}
+              onChange={e => setNombre(e.target.value)}
+              required
+            />
+          )}
+
+          {/* USUARIO */}
+          <input
+            className={`w-full border p-2 rounded ${
+              esInstitucion ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
+            placeholder="Usuario"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            disabled={esInstitucion}
+            required
+          />
+
+          {/* CONTRASEÑA */}
+          <input
+            type="password"
+            className="w-full border p-2 rounded"
+            placeholder="Contraseña"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required={!usuario}
+          />
+
+          {/* ROL */}
+          <select
+            className="w-full border p-2 rounded"
+            value={roleId}
+            onChange={e => setRoleId(e.target.value)}
+            required
+          >
+            <option value="">Seleccione rol</option>
+            {roles.map(r => (
+              <option key={r.roleId} value={r.roleId}>
+                {r.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex justify-end gap-3 mt-6">

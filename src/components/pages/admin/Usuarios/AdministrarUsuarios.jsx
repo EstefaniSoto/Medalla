@@ -66,8 +66,9 @@ export default function AdministrarUsuarios({ onBack }) {
                 <td className="p-4">{u.nombre}</td>
                 <td className="p-4">{u.username}</td>
                 <td className="p-4">
-                  {u.roleId === 2 ? "Votante" : "Admin"}
-                </td>
+                  {u.roleId === 2 ? "Votante" : u.roleId === 3 ? "Admin" : "Otro"}
+                  </td>
+
                 <td className="p-4">
                   {u.institucion ?? "—"}
                 </td>

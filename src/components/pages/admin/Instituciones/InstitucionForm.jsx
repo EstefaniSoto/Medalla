@@ -6,23 +6,26 @@ export default function InstitucionForm({ institucion, onClose, onSave }) {
   useEffect(() => {
     if (institucion) {
       setNombre(institucion.nombre);
+    } else {
+      setNombre("");
     }
   }, [institucion]);
 
   const guardar = async (e) => {
     e.preventDefault();
 
-    const data = {
-      nombre
-    };
+    const data = { nombre };
 
-    if (institucion) {
-      await onSave("update", institucion.institucionId, data);
-    } else {
-      await onSave("create", null, data);
+    try {
+      if (institucion) {
+        await onSave("update", institucion.institucionId, data);
+      } else {
+        await onSave("create", null, data);
+      }
+      onClose();
+    } catch (err) {
+      alert("Error al guardar");
     }
-
-    onClose();
   };
 
   return (
