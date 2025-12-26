@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Swal from "sweetalert2";
 import { crearCandidata, actualizarCandidata } from "../../../../api/candidatas.api";
 import { obtenerCategorias } from "../../../../api/categorias.api";
 import { ImagePlus } from "lucide-react";
@@ -18,15 +19,26 @@ export default function CandidataForm({ candidata, onClose, onSave }) {
     if (candidata) {
       setNombre(candidata.nombre);
       setCategoriaId(String(candidata.categoriaId));
+
       if (candidata.fotoUrl) {
-        setPreview(candidata.fotoUrl);
+        setPreview(candidata.fotoUrl); // 👈 directo desde la API
       }
     }
+
+    return () => {
+      if (preview?.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
   }, [candidata]);
 
   const onFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (preview?.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
 
     setFoto(file);
     setPreview(URL.createObjectURL(file));
@@ -35,22 +47,64 @@ export default function CandidataForm({ candidata, onClose, onSave }) {
   const guardar = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("Nombre", nombre);
-    formData.append("CategoriaId", parseInt(categoriaId, 10));
-
-    if (foto) {
-      formData.append("Foto", foto);
+    if (!nombre || !categoriaId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campos incompletos",
+        text: "Debe completar todos los campos obligatorios"
+      });
+      return;
     }
 
-    if (candidata) {
-      await actualizarCandidata(candidata.candidataId, formData);
-    } else {
-      await crearCandidata(formData);
-    }
+    const confirm = await Swal.fire({
+      title: candidata ? "¿Actualizar candidata?" : "¿Crear candidata?",
+      text: candidata
+        ? "Se guardarán los cambios realizados"
+        : "Se registrará una nueva candidata",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#003478",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, guardar",
+      cancelButtonText: "Cancelar"
+    });
 
-    onSave();
-    onClose();
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("Nombre", nombre);
+      formData.append("CategoriaId", Number(categoriaId));
+
+      if (foto) {
+        formData.append("Foto", foto);
+      }
+
+      if (candidata) {
+        await actualizarCandidata(candidata.candidataId, formData);
+      } else {
+        await crearCandidata(formData);
+      }
+
+      await Swal.fire({
+        icon: "success",
+        title: "Guardado",
+        text: candidata
+          ? "La candidata fue actualizada correctamente"
+          : "La candidata fue creada correctamente",
+        timer: 1800,
+        showConfirmButton: false
+      });
+
+      onSave();
+      onClose();
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al guardar la candidata"
+      });
+    }
   };
 
   return (

@@ -49,25 +49,27 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
   };
 
   const guardar = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const data = {
-      nombre,
-      username,
-      password: password || null,
-      roleId,
-      institucionId: esInstitucion ? institucionId : null
-    };
-
-    if (usuario) {
-      await actualizarUsuario(usuario.usuarioId, data);
-    } else {
-      await crearUsuario(data);
-    }
-
-    onSave();
-    onClose();
+  const data = {
+    usuarioId: usuario?.usuarioId || 0, 
+    nombre,
+    username,
+    password: password || null,
+    roleId: Number(roleId),
+    institucionId: esInstitucion ? institucionId : null
   };
+
+  if (usuario) {
+    await actualizarUsuario(usuario.usuarioId, data);
+  } else {
+    await crearUsuario(data);
+  }
+
+  onSave();  
+  onClose();
+};
+
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -79,7 +81,7 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
           <h3 className="text-xl font-bold">
             {usuario ? "Editar Usuario" : "Nuevo Usuario"}
           </h3>
-          <button type="button" onClick={onClose}>
+          <button type="button" onClick={onClose} className="text-red-600 cursor-pointer">
             <X />
           </button>
         </div>
@@ -172,13 +174,13 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border rounded"
+            className="px-4 py-2 border rounded cursor-pointer"
           >
             Cancelar
           </button>
 
           <button
-            className="px-4 py-2 bg-[#003478] text-white rounded"
+            className="px-4 py-2 bg-[#003478] text-white rounded cursor-pointer"
           >
             Guardar
           </button>

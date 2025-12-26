@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Pencil, Trash2, Plus, ArrowLeft } from "lucide-react";
-import { obtenerCategorias, eliminarCategoria } from "../../../../api/categorias.api";
+import Swal from "sweetalert2";
+import {
+  obtenerCategorias,
+  eliminarCategoria
+} from "../../../../api/categorias.api";
 import CategoriaForm from "./CategoriaForm";
 
 export default function AdministrarCategorias({ onBack }) {
@@ -18,9 +22,39 @@ export default function AdministrarCategorias({ onBack }) {
   }, []);
 
   const borrar = async (id) => {
-    if (!confirm("¿Eliminar esta categoría?")) return;
-    await eliminarCategoria(id);
-    cargarCategorias();
+    const confirmacion = await Swal.fire({
+      title: "¿Eliminar categoría?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    try {
+      await eliminarCategoria(id);
+
+      Swal.fire({
+        icon: "success",
+        title: "Categoría eliminada",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      cargarCategorias();
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text:
+          error.response?.data ||
+          "No se pudo eliminar la categoría"
+      });
+    }
   };
 
   return (
@@ -34,7 +68,9 @@ export default function AdministrarCategorias({ onBack }) {
           >
             <ArrowLeft size={18} />
           </button>
-          <h1 className="text-2xl font-bold text-[#003478]">Administrar Categorías</h1>
+          <h1 className="text-2xl font-bold text-[#003478]">
+            Administrar Categorías
+          </h1>
         </div>
 
         <button
@@ -55,17 +91,25 @@ export default function AdministrarCategorias({ onBack }) {
             <tr>
               <th className="px-6 py-4 text-left font-semibold">Nombre</th>
               <th className="px-6 py-4 text-left font-semibold">Descripción</th>
-              <th className="px-6 py-4 text-center font-semibold w-32">Acciones</th>
+              <th className="px-6 py-4 text-center font-semibold w-32">
+                Acciones
+              </th>
             </tr>
           </thead>
           <tbody>
             {categorias.map((c, idx) => (
               <tr
                 key={c.categoriaId}
-                className={`border-t transition hover:bg-slate-50 ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}`}
+                className={`border-t transition hover:bg-slate-50 ${
+                  idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"
+                }`}
               >
-                <td className="px-6 py-4 font-medium text-slate-800">{c.nombre}</td>
-                <td className="px-6 py-4 text-slate-600">{c.descripcion || "Sin descripción"}</td>
+                <td className="px-6 py-4 font-medium text-slate-800">
+                  {c.nombre}
+                </td>
+                <td className="px-6 py-4 text-slate-600">
+                  {c.descripcion || "Sin descripción"}
+                </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-center gap-2">
                     <button
@@ -91,11 +135,16 @@ export default function AdministrarCategorias({ onBack }) {
         </table>
       </div>
 
-      {/* ===== MOBILE / TABLET: CARDS ===== */}
+      {/* ===== MOBILE / CARDS ===== */}
       <div className="md:hidden space-y-4">
         {categorias.map((c) => (
-          <div key={c.categoriaId} className="bg-white rounded-2xl shadow p-5">
-            <h3 className="font-semibold text-lg text-[#003478]">{c.nombre}</h3>
+          <div
+            key={c.categoriaId}
+            className="bg-white rounded-2xl shadow p-5"
+          >
+            <h3 className="font-semibold text-lg text-[#003478]">
+              {c.nombre}
+            </h3>
             <p className="text-gray-600 text-sm mt-1">
               {c.descripcion || "Sin descripción"}
             </p>

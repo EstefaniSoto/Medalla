@@ -11,3 +11,7 @@ export const actualizarUsuario = (id, data) =>
 
 export const eliminarUsuario = (id) =>
   axiosClient.delete(`/Usuarios/${id}`);
+
+// ✅ LOGIN (NUEVO)
+export const login = (data) =>
+  axiosClient.post("/Usuarios/login", data);
