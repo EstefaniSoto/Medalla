@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import {
   crearPregunta,
   actualizarPregunta
 } from "../../../../api/preguntasCategoria.api";
-
 
 export default function PreguntaForm({
   categoriaId,
@@ -15,7 +15,7 @@ export default function PreguntaForm({
   const [texto, setTexto] = useState("");
   const [puntajeMaximo, setPuntajeMaximo] = useState(1);
   const [orden, setOrden] = useState(1);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (pregunta) {
@@ -29,28 +29,78 @@ export default function PreguntaForm({
     }
   }, [pregunta]);
 
- const guardar = async (e) => {
-  e.preventDefault();
+  const guardar = async (e) => {
+    e.preventDefault();
 
-  const data = {
-    categoriaId,
-    texto,
-    puntajeMaximo,
-    orden,
-    activa: true
+    // 🔹 Validaciones frontend (UX)
+    if (!texto.trim()) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Campo obligatorio",
+        text: "Debes escribir el texto de la pregunta"
+      });
+    }
+
+    if (puntajeMaximo <= 0) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Puntaje inválido",
+        text: "El puntaje debe ser mayor que 0"
+      });
+    }
+
+    // 🔹 Confirmación
+    const confirmacion = await Swal.fire({
+      title: pregunta ? "¿Actualizar pregunta?" : "¿Crear pregunta?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Guardar",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    const data = {
+      categoriaId,
+      texto,
+      puntajeMaximo,
+      orden,
+      activa: true
+    };
+
+    try {
+      setLoading(true);
+
+      if (pregunta) {
+        await actualizarPregunta(pregunta.preguntaId, {
+          ...data,
+          preguntaId: pregunta.preguntaId
+        });
+      } else {
+        await crearPregunta(data);
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Guardado correctamente",
+        timer: 1200,
+        showConfirmButton: false
+      });
+
+      onSaved();
+      onClose();
+    } catch (err) {
+      const mensaje = err.response?.data;
+
+      Swal.fire({
+        icon: "warning",
+        title: "Regla de puntaje",
+        text: mensaje || "No se pudo guardar la pregunta"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
-
-  console.log("DATA QUE SE ENVÍA:", data);
-
-  try {
-    await crearPregunta(data);
-    onSaved();
-    onClose();
-  } catch (err) {
-    console.error("ERROR DEL BACKEND:", err.response?.data);
-  }
-};
-
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -68,7 +118,7 @@ export default function PreguntaForm({
           placeholder="Texto de la pregunta"
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          required
+          disabled={loading}
         />
 
         {/* PUNTAJE Y ORDEN */}
@@ -81,7 +131,7 @@ export default function PreguntaForm({
               min={1}
               value={puntajeMaximo}
               onChange={(e) => setPuntajeMaximo(Number(e.target.value))}
-              required
+              disabled={loading}
             />
           </div>
 
@@ -93,17 +143,10 @@ export default function PreguntaForm({
               min={1}
               value={orden}
               onChange={(e) => setOrden(Number(e.target.value))}
-              required
+              disabled={loading}
             />
           </div>
         </div>
-
-        {/* ERROR */}
-        {error && (
-          <div className="text-red-600 text-sm font-medium">
-            {error}
-          </div>
-        )}
 
         {/* BOTONES */}
         <div className="flex justify-end gap-2 pt-4">
@@ -111,14 +154,16 @@ export default function PreguntaForm({
             type="button"
             onClick={onClose}
             className="px-4 py-2 rounded-xl border"
+            disabled={loading}
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="px-4 py-2 rounded-xl bg-[#003478] text-white"
+            className="px-4 py-2 rounded-xl bg-[#003478] text-white disabled:opacity-60"
+            disabled={loading}
           >
-            Guardar
+            {loading ? "Guardando..." : "Guardar"}
           </button>
         </div>
       </form>
