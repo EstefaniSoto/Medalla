@@ -21,7 +21,8 @@ export default function DashboardAdmin({
   onCandidatas,
   onInstituciones,
   onUsuarios,
-  onPreguntasCategoria
+  onPreguntasCategoria,
+  onResultados  
 }) {
 
   const [totales, setTotales] = useState({
@@ -67,12 +68,17 @@ export default function DashboardAdmin({
         <img src="img/logo2.jpg" alt="" width={200} />
 
         <button
-          className="flex items-center gap-2 px-3 py-2 rounded 
-          bg-linear-to-r from-[#CDA776] to-[#b88a4b]
-          text-black font-semibold hover:opacity-90 transition cursor-pointer"
-        >
-          <LogOut size={18} /> Cerrar Sesión
-        </button>
+  onClick={() => {
+    localStorage.clear(); 
+    window.location.href = "/";
+  }}
+  className="flex items-center gap-2 px-3 py-2 rounded 
+  bg-linear-to-r from-[#CDA776] to-[#b88a4b]
+  text-black font-semibold hover:opacity-90 transition cursor-pointer"
+>
+  <LogOut size={18} /> Cerrar Sesión
+</button>
+
       </nav>
 
       {/* CONTENIDO */}
@@ -154,7 +160,10 @@ export default function DashboardAdmin({
             title="Ver Resultados"
             text="Consulta promedios, puntajes y finalistas."
             color="text-green-600"
+            onClick={onResultados}
           />
+
+
         </div>
       </div>
     </div>

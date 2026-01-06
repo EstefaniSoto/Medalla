@@ -31,6 +31,10 @@ export default function Login() {
       localStorage.setItem("usuarioId", user.usuarioId);
       localStorage.setItem("rol", user.role);
       localStorage.setItem("nombre", user.nombre);
+      if (user.role === "institucion") {
+        localStorage.setItem("institucionId", user.institucionId);
+      }
+
 
       // Redirección por rol
       switch (user.role) {

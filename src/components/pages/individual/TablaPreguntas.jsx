@@ -11,7 +11,7 @@ export default function TablaPreguntas({ categoria, candidata, onBack }) {
 
   const usuarioId = Number(localStorage.getItem("usuarioId"));
 
-  //VERIFICAR SI YA VOTÓ
+  // VERIFICAR SI YA VOTÓ
   useEffect(() => {
     const verificar = async () => {
       try {
@@ -41,7 +41,7 @@ export default function TablaPreguntas({ categoria, candidata, onBack }) {
     verificar();
   }, [usuarioId, candidata, onBack]);
 
-  //CARGAR PREGUNTAS
+  // CARGAR PREGUNTAS
   useEffect(() => {
     const cargarPreguntas = async () => {
       try {
@@ -61,7 +61,7 @@ export default function TablaPreguntas({ categoria, candidata, onBack }) {
     cargarPreguntas();
   }, [categoria]);
 
-  //CONTROL DE PUNTAJES
+  // CONTROL DE PUNTAJES
   const handleChange = (preguntaId, valor, max) => {
     if (valor < 0) return;
 
@@ -110,6 +110,13 @@ export default function TablaPreguntas({ categoria, candidata, onBack }) {
     try {
       setLoading(true);
 
+      // 🔍 DEBUG: AQUÍ ES DONDE VA EL CONSOLE.LOG
+      console.log("ENVIANDO VOTO:", {
+        usuarioId,
+        candidataId: candidata.candidataId,
+        puntaje: total
+      });
+
       await guardarVotoNormal({
         usuarioId,
         candidataId: candidata.candidataId,
@@ -123,8 +130,9 @@ export default function TablaPreguntas({ categoria, candidata, onBack }) {
       });
 
       onBack();
-
     } catch (err) {
+      console.error("ERROR AL GUARDAR VOTO:", err);
+
       if (err.response?.status === 409) {
         Swal.fire({
           icon: "info",

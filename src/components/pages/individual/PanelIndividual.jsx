@@ -21,13 +21,18 @@ export default function PanelIndividual() {
       <nav className="w-full bg-[#003478] shadow-md p-4 flex justify-between items-center">
         <img src="img/logo2.jpg" alt="" width={200} />
 
-        <button
-          className="flex items-center gap-2 px-3 py-2 rounded 
-          bg-linear-to-r from-[#CDA776] to-[#b88a4b]
-          text-black font-semibold hover:opacity-90 transition cursor-pointer"
-        >
-          <LogOut size={18} /> Cerrar Sesión
-        </button>
+              <button
+        onClick={() => {
+          localStorage.clear(); 
+          window.location.href = "/";
+        }}
+        className="flex items-center gap-2 px-3 py-2 rounded 
+        bg-linear-to-r from-[#CDA776] to-[#b88a4b]
+        text-black font-semibold hover:opacity-90 transition cursor-pointer"
+      >
+        <LogOut size={18} /> Cerrar Sesión
+      </button>
+          
       </nav>
 
       
