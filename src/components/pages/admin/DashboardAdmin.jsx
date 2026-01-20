@@ -69,21 +69,33 @@ export default function DashboardAdmin({
 
         <button
   onClick={() => {
-    localStorage.clear(); 
+    localStorage.clear();
     window.location.href = "/";
   }}
-  className="flex items-center gap-2 px-3 py-2 rounded 
-  bg-linear-to-r from-[#CDA776] to-[#b88a4b]
-  text-black font-semibold hover:opacity-90 transition cursor-pointer"
+  className="
+    flex items-center justify-center gap-2
+    px-3 py-2 md:px-4 md:py-2.5
+    rounded-lg
+    bg-linear-to-r from-[#CDA776] to-[#b88a4b]
+    text-black font-semibold
+    hover:opacity-90 transition
+    cursor-pointer
+  "
 >
-  <LogOut size={18} /> Cerrar Sesión
+  <LogOut size={18} className="md:size-4" />
+
+  {/* Texto solo en pantallas medianas en adelante */}
+  <span className="hidden md:inline">
+    Cerrar Sesión
+  </span>
 </button>
+
 
       </nav>
 
       {/* CONTENIDO */}
       <div className="py-10 px-6">
-        <h2 className="text-3xl font-bold">Bienvenida, Admin</h2>
+        <h2 className="text-3xl font-bold">Bienvenido, Admin</h2>
         <p className="text-gray-700 mb-6">
           Aquí podrás gestionar usuarios, ver estadísticas y administrar el sistema.
         </p>

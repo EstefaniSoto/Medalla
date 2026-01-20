@@ -124,7 +124,7 @@ export default function Top3Candidatas({
               </div>
 
               <img
-                src={`https://localhost:7212${c.fotoUrl}`}
+                src={`https://9pwgkwzs-7212.use.devtunnels.ms/${c.fotoUrl}`}
                 className="w-28 h-28 mx-auto rounded-full object-cover mb-4"
               />
 
@@ -144,20 +144,19 @@ export default function Top3Candidatas({
 
       {/* SIGUIENTE */}
       <div className="flex justify-center mt-14">
-        <button
+              <button
           onClick={onSiguiente}
           disabled={!votado}
           className={`
             px-10 py-3 rounded-xl text-lg font-semibold transition
-            ${
-              votado
-                ? "bg-black text-white hover:opacity-90"
-                : "bg-gray-300 cursor-not-allowed"
-            }
+            ${votado
+              ? "bg-black text-white hover:opacity-90"
+              : "bg-gray-300 cursor-not-allowed"}
           `}
         >
-          {esUltima ? "Finalizar votación" : "Siguiente categoría"}
+          Volver a categorías
         </button>
+
       </div>
     </div>
     </div>

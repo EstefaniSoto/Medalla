@@ -80,7 +80,7 @@ export default function AdministrarCandidatas({ onBack }) {
                   <img
                     src={
                       c.fotoUrl
-                        ? `https://localhost:7212${c.fotoUrl}`
+                        ? `https://9pwgkwzs-7212.use.devtunnels.ms/${c.fotoUrl}`
                         : "https://img.icons8.com/bubbles/100/user.png"
                     }
                     alt={c.nombre}
@@ -130,7 +130,7 @@ export default function AdministrarCandidatas({ onBack }) {
             <img
               src={
                 c.fotoUrl
-                  ? `https://localhost:7212${c.fotoUrl}`
+                  ? `https://9pwgkwzs-7212.use.devtunnels.ms/${c.fotoUrl}`
                   : "https://img.icons8.com/bubbles/100/user.png"
               }
               alt={c.nombre}
