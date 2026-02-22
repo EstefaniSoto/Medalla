@@ -1,5 +1,6 @@
 // src/components/pages/admin/AdministrarCandidatas.jsx
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import { Pencil, Trash2, Plus, ArrowLeft } from "lucide-react";
 import {
   obtenerCandidatas,
@@ -21,15 +22,43 @@ export default function AdministrarCandidatas({ onBack }) {
     cargar();
   }, []);
 
+  /* 🔥 BORRAR CON SWEET ALERT */
   const borrar = async (id) => {
-    if (!confirm("¿Eliminar esta candidata?")) return;
-    await eliminarCandidata(id);
-    cargar();
+    const confirm = await Swal.fire({
+      title: "¿Está seguro?",
+      text: "Esta acción eliminará la candidata permanentemente",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await eliminarCandidata(id);
+
+      Swal.fire(
+        "Eliminada",
+        "La candidata fue eliminada correctamente",
+        "success"
+      );
+
+      cargar();
+    } catch {
+      Swal.fire(
+        "Error",
+        "No se pudo eliminar la candidata",
+        "error"
+      );
+    }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-100 to-slate-200 p-6">
-      {/* ===== HEADER ===== */}
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
           <button
@@ -54,7 +83,7 @@ export default function AdministrarCandidatas({ onBack }) {
         </button>
       </div>
 
-      {/* ===== DESKTOP: TABLA ===== */}
+      {/* DESKTOP TABLA */}
       <div className="hidden md:block bg-white rounded-2xl shadow-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-[#003478] text-white">
@@ -75,12 +104,11 @@ export default function AdministrarCandidatas({ onBack }) {
                   idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"
                 }`}
               >
-                {/* FOTO */}
                 <td className="px-6 py-4">
                   <img
                     src={
                       c.fotoUrl
-                        ? `https://9pwgkwzs-7212.use.devtunnels.ms/${c.fotoUrl}`
+                        ? `http://190.166.237.107/Medalla_Al_Merito_Api/${c.fotoUrl}`
                         : "https://img.icons8.com/bubbles/100/user.png"
                     }
                     alt={c.nombre}
@@ -120,7 +148,7 @@ export default function AdministrarCandidatas({ onBack }) {
         </table>
       </div>
 
-      {/* ===== MOBILE / TABLET: CARDS ===== */}
+      {/* MOBILE */}
       <div className="md:hidden space-y-4">
         {candidatas.map((c) => (
           <div
@@ -130,7 +158,7 @@ export default function AdministrarCandidatas({ onBack }) {
             <img
               src={
                 c.fotoUrl
-                  ? `https://9pwgkwzs-7212.use.devtunnels.ms/${c.fotoUrl}`
+                  ? `http://190.166.237.107/Medalla_Al_Merito_Api/${c.fotoUrl}`
                   : "https://img.icons8.com/bubbles/100/user.png"
               }
               alt={c.nombre}
@@ -167,14 +195,12 @@ export default function AdministrarCandidatas({ onBack }) {
         ))}
       </div>
 
-      {/* EMPTY */}
       {candidatas.length === 0 && (
         <div className="text-center text-gray-500 mt-20">
           No hay candidatas registradas
         </div>
       )}
 
-      {/* MODAL */}
       {showForm && (
         <CandidataForm
           candidata={editItem}

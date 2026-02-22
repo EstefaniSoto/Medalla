@@ -124,7 +124,7 @@ export default function Top3Candidatas({
               </div>
 
               <img
-                src={`https://9pwgkwzs-7212.use.devtunnels.ms/${c.fotoUrl}`}
+                src={`http://190.166.237.107/Medalla_Al_Merito_Api/${c.fotoUrl}`}
                 className="w-28 h-28 mx-auto rounded-full object-cover mb-4"
               />
 

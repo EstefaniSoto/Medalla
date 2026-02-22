@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import Swal from "sweetalert2";
 import {
   obtenerUsuarios,
   eliminarUsuario
@@ -20,10 +21,39 @@ export default function AdministrarUsuarios({ onBack }) {
     cargar();
   }, []);
 
+  /* 🔥 BORRAR CON SWEET ALERT */
   const borrar = async (id) => {
-    if (!confirm("¿Eliminar este usuario?")) return;
-    await eliminarUsuario(id);
-    cargar();
+    const confirm = await Swal.fire({
+      title: "¿Eliminar usuario?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await eliminarUsuario(id);
+
+      Swal.fire({
+        icon: "success",
+        title: "Usuario eliminado",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      cargar();
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo eliminar el usuario"
+      });
+    }
   };
 
   const getRol = (roleId) => {

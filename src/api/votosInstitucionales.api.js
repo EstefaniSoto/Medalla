@@ -8,3 +8,6 @@ export const registrarVotoInstitucional = (data) =>
 
 export const obtenerPodioPorCategoria = (categoriaId) =>
   axiosClient.get(`/votos-institucionales/podio/${categoriaId}`);
+
+export const borrarVotosFinalistas = (categoriaId) =>
+  axiosClient.delete(`/votos-institucionales/finalistas/${categoriaId}`);

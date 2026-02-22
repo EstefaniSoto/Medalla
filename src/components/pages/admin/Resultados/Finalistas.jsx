@@ -329,7 +329,7 @@ function PodioCard({ data, emoji, color, altura, delay, ganador }) {
       >
         <div className="w-28 h-28 rounded-full -mt-16 border-4 border-white bg-white overflow-hidden">
           <img
-            src={`https://localhost:7212${data.fotoUrl}`}
+            src={`http://190.166.237.107/Medalla_Al_Merito_Api/${data.fotoUrl}`}
             alt={data.nombre}
             className="w-full h-full object-cover"
           />

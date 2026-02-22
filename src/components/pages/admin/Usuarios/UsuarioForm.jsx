@@ -21,55 +21,56 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
   const [instituciones, setInstituciones] = useState([]);
   const [roles, setRoles] = useState([]);
 
+  /* 🔹 CARGAR DATA */
   useEffect(() => {
     obtenerInstituciones().then(res => setInstituciones(res.data));
     obtenerRoles().then(res => setRoles(res.data));
   }, []);
 
-  const generarUsernameInstitucion = (nombre) => {
-    return nombre
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "_")
-      .replace(/[^a-z0-9_]/g, "");
-  };
+  /* 🔹 AUTO ROL INSTITUCIÓN */
+  useEffect(() => {
+    if (!roles.length) return;
 
-  const seleccionarInstitucion = (id) => {
-    setInstitucionId(id);
-
-    const institucion = instituciones.find(
-      i => i.institucionId == id
+    const rolInstitucion = roles.find(r =>
+      r.name?.toLowerCase().includes("institucion")
     );
 
-    if (institucion) {
-      setUsername(generarUsernameInstitucion(institucion.nombre));
-      setNombre(institucion.nombre);
+    if (esInstitucion && rolInstitucion) {
+      setRoleId(rolInstitucion.roleId);
     }
-  };
+  }, [roles, esInstitucion]);
 
   const guardar = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const data = {
-    usuarioId: usuario?.usuarioId || 0, 
-    nombre,
-    username,
-    password: password || null,
-    roleId: Number(roleId),
-    institucionId: esInstitucion ? institucionId : null
+    let nombreFinal = nombre;
+
+    // Si es institución, usar el nombre de la institución seleccionada
+    if (esInstitucion) {
+      const institucionSeleccionada = instituciones.find(
+        i => i.institucionId === Number(institucionId)
+      );
+      nombreFinal = institucionSeleccionada?.nombre || "";
+    }
+
+    const data = {
+      usuarioId: usuario?.usuarioId || 0,
+      nombre: nombreFinal, // 🔥 YA NO VA NULL
+      username,
+      password: password || null,
+      roleId: Number(roleId),
+      institucionId: esInstitucion ? Number(institucionId) : null
+    };
+
+    if (usuario) {
+      await actualizarUsuario(usuario.usuarioId, data);
+    } else {
+      await crearUsuario(data);
+    }
+
+    onSave();
+    onClose();
   };
-
-  if (usuario) {
-    await actualizarUsuario(usuario.usuarioId, data);
-  } else {
-    await crearUsuario(data);
-  }
-
-  onSave();  
-  onClose();
-};
-
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -81,22 +82,27 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
           <h3 className="text-xl font-bold">
             {usuario ? "Editar Usuario" : "Nuevo Usuario"}
           </h3>
-          <button type="button" onClick={onClose} className="text-red-600 cursor-pointer">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-red-600 cursor-pointer"
+          >
             <X />
           </button>
         </div>
 
-        {/* TIPO USUARIO */}
+        {/* 🔹 CHECK INSTITUCIÓN */}
         <label className="flex items-center gap-2 text-sm mb-4">
           <input
             type="checkbox"
             checked={esInstitucion}
             onChange={(e) => {
-              setEsInstitucion(e.target.checked);
-              if (!e.target.checked) {
+              const checked = e.target.checked;
+              setEsInstitucion(checked);
+
+              if (!checked) {
                 setInstitucionId("");
-                setUsername("");
-                setNombre("");
+                setRoleId("");
               }
             }}
           />
@@ -104,12 +110,12 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
         </label>
 
         <div className="space-y-4">
-          {/* INSTITUCIÓN */}
+          {/* 🔹 SELECT INSTITUCIÓN */}
           {esInstitucion && (
             <select
               className="w-full border p-2 rounded"
               value={institucionId}
-              onChange={(e) => seleccionarInstitucion(e.target.value)}
+              onChange={(e) => setInstitucionId(Number(e.target.value))}
               required
             >
               <option value="">Seleccione institución</option>
@@ -121,7 +127,7 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
             </select>
           )}
 
-          {/* NOMBRE */}
+          {/* 🔹 NOMBRE SOLO SI NO ES INSTITUCIÓN */}
           {!esInstitucion && (
             <input
               className="w-full border p-2 rounded"
@@ -132,19 +138,16 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
             />
           )}
 
-          {/* USUARIO */}
+          {/* 🔹 USERNAME */}
           <input
-            className={`w-full border p-2 rounded ${
-              esInstitucion ? "bg-gray-100 cursor-not-allowed" : ""
-            }`}
+            className="w-full border p-2 rounded"
             placeholder="Usuario"
             value={username}
             onChange={e => setUsername(e.target.value)}
-            disabled={esInstitucion}
             required
           />
 
-          {/* CONTRASEÑA */}
+          {/* 🔹 PASSWORD */}
           <input
             type="password"
             className="w-full border p-2 rounded"
@@ -154,11 +157,11 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
             required={!usuario}
           />
 
-          {/* ROL */}
+          {/* 🔹 ROL */}
           <select
             className="w-full border p-2 rounded"
             value={roleId}
-            onChange={e => setRoleId(e.target.value)}
+            onChange={e => setRoleId(Number(e.target.value))}
             required
           >
             <option value="">Seleccione rol</option>
@@ -179,9 +182,7 @@ export default function UsuarioForm({ usuario, onClose, onSave }) {
             Cancelar
           </button>
 
-          <button
-            className="px-4 py-2 bg-[#003478] text-white rounded cursor-pointer"
-          >
+          <button className="px-4 py-2 bg-[#003478] text-white rounded cursor-pointer">
             Guardar
           </button>
         </div>

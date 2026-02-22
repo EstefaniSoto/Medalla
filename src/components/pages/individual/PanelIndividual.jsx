@@ -94,9 +94,7 @@ export default function PanelIndividual() {
   );
 }
 
-/* -------------------- */
-/* COMPONENTE PASO */
-/* -------------------- */
+
 function Step({ texto, activo }) {
   return (
     <div

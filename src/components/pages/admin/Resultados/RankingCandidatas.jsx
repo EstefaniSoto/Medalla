@@ -2,29 +2,32 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { obtenerResultadosPorCategoria } from "../../../../api/resultadosNormales.api";
+import { borrarVotosFinalistas } from "../../../../api/votosInstitucionales.api";
 import { ArrowLeft, Star, FileSpreadsheet } from "lucide-react";
 
 export default function RankingCandidatas({ categoria, onBack }) {
   const [resultados, setResultados] = useState([]);
 
-  useEffect(() => {
-    const cargar = async () => {
-      try {
-        const { data } = await obtenerResultadosPorCategoria(
-          categoria.categoriaId
-        );
-        setResultados(data);
-      } catch {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "No se pudieron cargar los resultados"
-        });
-      }
-    };
+  const rol = localStorage.getItem("rol");
 
-    cargar();
+  useEffect(() => {
+    cargarResultados();
   }, [categoria]);
+
+  const cargarResultados = async () => {
+    try {
+      const { data } = await obtenerResultadosPorCategoria(
+        categoria.categoriaId
+      );
+      setResultados(data);
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudieron cargar los resultados"
+      });
+    }
+  };
 
   /* 🟡 EXPORTAR A EXCEL */
   const exportarExcel = () => {
@@ -36,7 +39,13 @@ export default function RankingCandidatas({ categoria, onBack }) {
     const dataExcel = resultados.map((r, index) => ({
       Posición: index + 1,
       Medalla:
-        index === 0 ? "Oro" : index === 1 ? "Plata" : index === 2 ? "Bronce" : "",
+        index === 0
+          ? "Oro"
+          : index === 1
+          ? "Plata"
+          : index === 2
+          ? "Bronce"
+          : "",
       Categoría: categoria.nombre,
       Candidata: r.nombre,
       "Total de puntos": r.sumaPuntos,
@@ -55,6 +64,34 @@ export default function RankingCandidatas({ categoria, onBack }) {
     );
   };
 
+  /* 🔥 BORRAR VOTOS FINALISTAS */
+  const eliminarVotosFinalistas = async () => {
+    const confirm = await Swal.fire({
+      title: "Eliminar votos del Top 3",
+      text: "Se eliminarán todos los votos institucionales de las finalistas",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await borrarVotosFinalistas(categoria.categoriaId);
+
+      Swal.fire(
+        "Eliminado",
+        "Los votos fueron borrados correctamente",
+        "success"
+      );
+
+      await cargarResultados();
+    } catch {
+      Swal.fire("Error", "No se pudo eliminar", "error");
+    }
+  };
+
   const medalla = (index) => {
     if (index === 0) return "🥇";
     if (index === 1) return "🥈";
@@ -65,7 +102,7 @@ export default function RankingCandidatas({ categoria, onBack }) {
   return (
     <div className="p-10">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-wrap gap-3 justify-between items-center mb-6">
         <button
           onClick={onBack}
           className="flex items-center gap-2 text-blue-600 hover:underline"
@@ -73,14 +110,26 @@ export default function RankingCandidatas({ categoria, onBack }) {
           <ArrowLeft size={18} /> Volver a categorías
         </button>
 
-        <button
-          onClick={exportarExcel}
-          className="flex items-center gap-2 bg-green-600 text-white 
-                     px-4 py-2 rounded-lg hover:opacity-90 transition"
-        >
-          <FileSpreadsheet size={18} />
-          Exportar Excel
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={exportarExcel}
+            className="flex items-center gap-2 bg-green-600 text-white 
+                       px-4 py-2 rounded-lg hover:opacity-90 transition"
+          >
+            <FileSpreadsheet size={18} />
+            Exportar Excel
+          </button>
+
+          {rol === "admin" && (
+            <button
+              onClick={eliminarVotosFinalistas}
+              className="flex items-center gap-2 bg-red-600 text-white 
+                         px-4 py-2 rounded-lg hover:bg-red-700 transition"
+            >
+              🗑 Borrar votos finalistas
+            </button>
+          )}
+        </div>
       </div>
 
       <h2 className="text-2xl font-bold text-[#003478] mb-2">
@@ -110,7 +159,7 @@ export default function RankingCandidatas({ categoria, onBack }) {
 
             {/* FOTO */}
             <img
-              src={`https://localhost:7212${r.fotoUrl}`}
+              src={`http://190.166.237.107/Medalla_Al_Merito_Api/${r.fotoUrl}`}
               className="w-28 h-28 mx-auto rounded-full object-cover 
                          border-4 border-[#CDA776] mb-4"
             />

@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import Swal from "sweetalert2";
+
 import {
   obtenerInstituciones,
   crearInstitucion,
   actualizarInstitucion,
   eliminarInstitucion
 } from "../../../../api/instituciones.api";
+
 import InstitucionForm from "./InstitucionForm";
 
 export default function AdministrarInstituciones({ onBack }) {
@@ -35,13 +38,43 @@ export default function AdministrarInstituciones({ onBack }) {
   };
 
   const borrar = async (id) => {
-    if (!confirm("¿Eliminar institución?")) return;
-    await eliminarInstitucion(id);
-    cargar();
+    const confirm = await Swal.fire({
+      title: "¿Eliminar institución?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await eliminarInstitucion(id);
+
+      Swal.fire({
+        icon: "success",
+        title: "Eliminada",
+        text: "La institución fue eliminada correctamente",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      cargar();
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo eliminar la institución"
+      });
+    }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-100 to-slate-200 p-6">
+
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
@@ -51,6 +84,7 @@ export default function AdministrarInstituciones({ onBack }) {
           >
             <ArrowLeft size={18} />
           </button>
+
           <h1 className="text-2xl font-bold text-[#003478]">
             Administrar Instituciones
           </h1>
@@ -76,6 +110,7 @@ export default function AdministrarInstituciones({ onBack }) {
               <th className="px-6 py-4 text-center w-32">Acciones</th>
             </tr>
           </thead>
+
           <tbody>
             {instituciones.map((i, idx) => (
               <tr
@@ -87,8 +122,10 @@ export default function AdministrarInstituciones({ onBack }) {
                 <td className="px-6 py-4 font-medium text-slate-800">
                   {i.nombre}
                 </td>
+
                 <td className="px-6 py-4">
                   <div className="flex justify-center gap-2">
+
                     <button
                       onClick={() => {
                         setEditItem(i);
@@ -98,29 +135,36 @@ export default function AdministrarInstituciones({ onBack }) {
                     >
                       <Pencil size={14} />
                     </button>
+
                     <button
                       onClick={() => borrar(i.institucionId)}
                       className="p-2 rounded-lg bg-red-600 text-white cursor-pointer"
                     >
                       <Trash2 size={14} />
                     </button>
+
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
 
       {/* MOBILE */}
       <div className="md:hidden space-y-4">
         {instituciones.map((i) => (
-          <div key={i.institucionId} className="bg-white rounded-2xl shadow p-5">
+          <div
+            key={i.institucionId}
+            className="bg-white rounded-2xl shadow p-5"
+          >
             <h3 className="font-semibold text-lg text-[#003478]">
               {i.nombre}
             </h3>
 
             <div className="flex justify-end gap-2 mt-4">
+
               <button
                 onClick={() => {
                   setEditItem(i);
@@ -130,12 +174,14 @@ export default function AdministrarInstituciones({ onBack }) {
               >
                 <Pencil size={16} />
               </button>
+
               <button
                 onClick={() => borrar(i.institucionId)}
                 className="p-2 rounded-lg bg-red-600 text-white"
               >
                 <Trash2 size={16} />
               </button>
+
             </div>
           </div>
         ))}
@@ -154,6 +200,7 @@ export default function AdministrarInstituciones({ onBack }) {
           onSave={guardar}
         />
       )}
+
     </div>
   );
 }
